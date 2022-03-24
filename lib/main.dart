@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Forecast Charts',
       home: MyHomeChartBody(),
     );
   }
@@ -53,7 +53,7 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
     late List<Time>? maxTList = [];
     void pop12hListFactory(i) {
       pop12hList.add(Time(
-          tag: i + 1,
+          tag: i,
           elementValue: data![0]
               .records!
               .locations![0]
@@ -65,7 +65,7 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
 
     void minTListFactory(i) {
       minTList.add(Time(
-          tag: i + 1,
+          tag: i,
           elementValue: data![0]
               .records!
               .locations![0]
@@ -77,7 +77,7 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
 
     void maxTListFactory(i) {
       maxTList.add(Time(
-          tag: i + 1,
+          tag: i,
           elementValue: data![0]
               .records!
               .locations![0]
@@ -87,7 +87,8 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
               .elementValue));
     }
 
-    for (var i = 0;
+//第一筆略過，取後面未來12小時的Data
+    for (var i = 1;
         i <
             data![0]
                 .records!
@@ -146,23 +147,32 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
             future: futureForecast,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 1.2,
-                  child: charts.OrdinalComboChart(
-                    forecastData(snapshot.data),
-                    defaultRenderer:
-                        charts.LineRendererConfig(strokeWidthPx: 6),
-                    customSeriesRenderers: [
-                      charts.BarRendererConfig(customRendererId: 'PoP12h'),
-                    ],
-                    animate: true,
-                    behaviors: [
-                      charts.SeriesLegend(
-                          position: charts.BehaviorPosition.bottom),
-                    ],
-                    primaryMeasureAxis: charts.PercentAxisSpec(),
-                  ),
+                return Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 1.2,
+                      child: charts.OrdinalComboChart(
+                        forecastData(snapshot.data),
+                        defaultRenderer:
+                            charts.LineRendererConfig(strokeWidthPx: 6),
+                        customSeriesRenderers: [
+                          charts.BarRendererConfig(customRendererId: 'PoP12h'),
+                        ],
+                        animate: true,
+                        behaviors: [
+                          charts.SeriesLegend(
+                              position: charts.BehaviorPosition.bottom),
+                        ],
+                        primaryMeasureAxis: charts.PercentAxisSpec(),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                        'API URL: https://opendata.cwb.gov.tw/dataset/forecast/F-D0047-063')
+                  ],
                 );
               } else {
                 return const CircularProgressIndicator();
