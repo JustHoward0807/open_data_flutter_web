@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:open_data_flutter_web/models/forecast_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -53,8 +54,14 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
     late List<Time>? maxTList = [];
     void pop12hListFactory(i) {
       pop12hList.add(Time(
-          tag: i,
-          elementValue: data![0]
+          startTime: data![0]
+              .records!
+              .locations![0]
+              .location![0]
+              .weatherElement![0]
+              .time![i]
+              .startTime,
+          elementValue: data[0]
               .records!
               .locations![0]
               .location![0]
@@ -65,8 +72,15 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
 
     void minTListFactory(i) {
       minTList.add(Time(
-          tag: i,
-          elementValue: data![0]
+          
+          startTime: data![0]
+              .records!
+              .locations![0]
+              .location![0]
+              .weatherElement![0]
+              .time![i]
+              .startTime,
+          elementValue: data[0]
               .records!
               .locations![0]
               .location![0]
@@ -77,8 +91,15 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
 
     void maxTListFactory(i) {
       maxTList.add(Time(
-          tag: i,
-          elementValue: data![0]
+          
+          startTime: data![0]
+              .records!
+              .locations![0]
+              .location![0]
+              .weatherElement![0]
+              .time![i]
+              .startTime,
+          elementValue: data[0]
               .records!
               .locations![0]
               .location![0]
@@ -108,7 +129,11 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
       charts.Series<Time, String>(
           id: 'PoP12h',
           colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-          domainFn: (Time pop12h, _) => pop12h.tag.toString(),
+          domainFn: (Time pop12h, _) {
+            final formatedTime =
+                DateFormat('yyyy-MM-dd HH:mm').format(pop12h.startTime!);
+            return formatedTime.toString();
+          },
           measureFn: (Time pop12h, _) => pop12h.elementValue![0].value != " "
               ? int.parse('${pop12h.elementValue![0].value}') * 0.01
               : 0,
@@ -119,7 +144,11 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
       charts.Series<Time, String>(
           id: 'minT',
           colorFn: (_, __) => charts.MaterialPalette.cyan.shadeDefault,
-          domainFn: (Time minT, _) => minT.tag.toString(),
+          domainFn: (Time minT, _) {
+            final formatedTime =
+                DateFormat('yyyy-MM-dd HH:mm').format(minT.startTime!);
+            return formatedTime.toString();
+          },
           measureFn: (Time minT, _) => minT.elementValue![0].value != " "
               ? int.parse('${minT.elementValue![0].value}')
               : 0,
@@ -131,7 +160,11 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
       charts.Series<Time, String>(
           id: 'maxT',
           colorFn: (_, __) => charts.MaterialPalette.deepOrange.shadeDefault,
-          domainFn: (Time maxT, _) => maxT.tag.toString(),
+          domainFn: (Time maxT, _) {
+            final formatedTime =
+                DateFormat('yyyy-MM-dd HH:mm').format(maxT.startTime!);
+            return formatedTime.toString();
+          },
           measureFn: (Time maxT, _) =>
               int.parse('${maxT.elementValue![0].value}'),
           data: maxTList)
@@ -142,41 +175,95 @@ class _MyHomeChartBodyState extends State<MyHomeChartBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: FutureBuilder<List<Forecast>>(
-            future: futureForecast,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Column(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 1.2,
-                      child: charts.OrdinalComboChart(
-                        forecastData(snapshot.data),
-                        defaultRenderer:
-                            charts.LineRendererConfig(strokeWidthPx: 6),
-                        customSeriesRenderers: [
-                          charts.BarRendererConfig(customRendererId: 'PoP12h'),
-                        ],
-                        animate: true,
-                        behaviors: [
-                          charts.SeriesLegend(
-                              position: charts.BehaviorPosition.bottom),
-                        ],
-                        primaryMeasureAxis: charts.PercentAxisSpec(),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                        'API URL: https://opendata.cwb.gov.tw/dataset/forecast/F-D0047-063')
-                  ],
-                );
-              } else {
-                return const CircularProgressIndicator();
-              }
-            }));
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.minWidth < 1500) {
+        return Scaffold(
+            body: FutureBuilder<List<Forecast>>(
+                future: futureForecast,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height / 1.2,
+                            child: charts.OrdinalComboChart(
+                              forecastData(snapshot.data),
+                              defaultRenderer:
+                                  charts.LineRendererConfig(strokeWidthPx: 6),
+                              customSeriesRenderers: [
+                                charts.BarRendererConfig(
+                                    customRendererId: 'PoP12h'),
+                              ],
+                              animate: true,
+                              behaviors: [
+                                charts.SeriesLegend(
+                                    position: charts.BehaviorPosition.bottom),
+                                charts.SlidingViewport(),
+                                charts.PanAndZoomBehavior(),
+                              ],
+                              primaryMeasureAxis: charts.PercentAxisSpec(),
+                              domainAxis: const charts.OrdinalAxisSpec(
+                                renderSpec: charts.SmallTickRendererSpec(
+                                    labelRotation: 60),
+                              ),
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                            'API URL: https://opendata.cwb.gov.tw/dataset/forecast/F-D0047-063')
+                      ],
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }));
+      } else {
+        // Rotate the text so they won't overlay each other 
+        return Scaffold(
+            body: FutureBuilder<List<Forecast>>(
+                future: futureForecast,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: [
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height / 1.2,
+                            child: charts.OrdinalComboChart(
+                              forecastData(snapshot.data),
+                              defaultRenderer:
+                                  charts.LineRendererConfig(strokeWidthPx: 6),
+                              customSeriesRenderers: [
+                                charts.BarRendererConfig(
+                                    customRendererId: 'PoP12h'),
+                              ],
+                              animate: true,
+                              behaviors: [
+                                charts.SeriesLegend(
+                                    position: charts.BehaviorPosition.bottom),
+                                charts.SlidingViewport(),
+                                charts.PanAndZoomBehavior(),
+                              ],
+                              primaryMeasureAxis: charts.PercentAxisSpec(),
+                              // domainAxis: charts.OrdinalAxisSpec(
+                              //   renderSpec: charts.SmallTickRendererSpec(
+                              //       labelRotation: 60),
+                              // ),
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                            'API URL: https://opendata.cwb.gov.tw/dataset/forecast/F-D0047-063')
+                      ],
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }));
+      }
+    });
   }
 }

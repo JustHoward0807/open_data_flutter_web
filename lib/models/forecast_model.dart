@@ -27,7 +27,7 @@ class Records {
     Map<dynamic, dynamic> toJson() => _$RecordsToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+// @JsonSerializable(explicitToJson: true)
 class RecordsLocation {
     RecordsLocation({
         this.datasetDescription,
@@ -44,7 +44,7 @@ class RecordsLocation {
     Map<dynamic, dynamic> toJson() => _$RecordsLocationToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+// @JsonSerializable(explicitToJson: true)
 class LocationLocation {
     LocationLocation({
         this.locationName,
@@ -64,7 +64,7 @@ class LocationLocation {
     Map<dynamic, dynamic> toJson() => _$LocationLocationToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+// @JsonSerializable(explicitToJson: true)
 class WeatherElement {
     WeatherElement({
         this.elementName,
@@ -79,15 +79,15 @@ class WeatherElement {
     Map<dynamic, dynamic> toJson() => _$WeatherElementToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+// @JsonSerializable(explicitToJson: true)
 class Time {
     Time({
         this.startTime,
         this.endTime,
         this.elementValue,
-        this.tag
+        
     });
-    int? tag;
+    
     DateTime? startTime;
     DateTime? endTime;
     List<ElementValue>? elementValue;
@@ -96,7 +96,7 @@ class Time {
     Map<dynamic, dynamic> toJson() => _$TimeToJson(this);
 }
 
-@JsonSerializable()
+// @JsonSerializable()
 class ElementValue {
     ElementValue({
         this.value,
@@ -109,7 +109,7 @@ class ElementValue {
     Map<dynamic, dynamic> toJson() => _$ElementValueToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+// @JsonSerializable(explicitToJson: true)
 class Result {
     Result({
         this.resourceId,
@@ -123,7 +123,7 @@ class Result {
     Map<dynamic, dynamic> toJson() => _$ResultToJson(this);
 }
 
-@JsonSerializable()
+// @JsonSerializable()
 class Field {
     Field({
         this.id,
